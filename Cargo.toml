@@ -1,0 +1,13 @@
+[package]
+name = "common_risp"
+version = "0.0.0"
+edition = "2021"
+license = "MIT"
+authors = ["myyrakle <sssang97@naver.com>"] 
+description = "LISP" 
+keywords = ["lisp", "functional"] 
+repository = "https://github.com/myyrakle/common_risp" 
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
