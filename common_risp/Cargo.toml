@@ -11,3 +11,4 @@ repository = "https://github.com/myyrakle/common_risp"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+risp_macro={ version="0.1.0", path="../risp_macro" }

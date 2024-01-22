@@ -5,3 +5,10 @@ version = 3
 [[package]]
 name = "common_risp"
 version = "0.0.0"
+dependencies = [
+ "risp_macro",
+]
+
+[[package]]
+name = "risp_macro"
+version = "0.1.0"
