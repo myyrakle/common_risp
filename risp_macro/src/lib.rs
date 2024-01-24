@@ -1,4 +1,4 @@
-use proc_macro::{TokenStream, TokenTree};
+use proc_macro::{Group, TokenStream, TokenTree};
 
 fn replace_spetial_function(name: &str) -> String {
     match name {
@@ -7,10 +7,38 @@ fn replace_spetial_function(name: &str) -> String {
     }
 }
 
-fn compile_expression(function_name: &str, tokens: Vec<TokenTree>) -> String {
+fn compile_expression(expression: Group) -> String {
+    let mut group_iter = expression.stream().into_iter().peekable();
+
+    let function_name = group_iter
+        .next()
+        .expect("Every root expression must have a function name.")
+        .to_string();
+    let function_name = function_name.as_str();
+
+    let tokens = group_iter.collect::<Vec<_>>();
+
     let mut rust_code = "".to_string();
 
     match function_name {
+        "+" | "-" | "*" | "/" => {
+            let mut operand = vec![];
+
+            for token in tokens {
+                match token {
+                    TokenTree::Group(group)
+                        if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
+                    {
+                        operand.push(compile_expression(group));
+                    }
+                    _ => {
+                        operand.push(token.to_string());
+                    }
+                }
+            }
+
+            rust_code.push_str(&format!("({})", operand.join(function_name)));
+        }
         "defparameter" => {
             panic!("defparameter is not supported.")
         }
@@ -27,10 +55,7 @@ fn compile_expression(function_name: &str, tokens: Vec<TokenTree>) -> String {
                     TokenTree::Group(group)
                         if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
                     {
-                        parameters.push(compile_expression(
-                            &group.stream().into_iter().next().unwrap().to_string(),
-                            group.stream().into_iter().skip(1).collect::<Vec<_>>(),
-                        ));
+                        parameters.push(compile_expression(group));
                     }
                     _ => {
                         parameters.push(token.to_string());
@@ -50,16 +75,7 @@ fn compile_root_expression(token_tree: TokenTree) -> String {
         TokenTree::Group(group) if group.delimiter() == proc_macro::Delimiter::Parenthesis => {
             let mut rust_code = "".to_string();
 
-            let mut group_iter = group.stream().into_iter();
-
-            let function_name = group_iter
-                .next()
-                .expect("Every root expression must have a function name.")
-                .to_string();
-
-            let parameters = group_iter.collect::<Vec<_>>();
-
-            rust_code.push_str(&compile_expression(&function_name, parameters));
+            rust_code.push_str(&compile_expression(group));
 
             rust_code
         }
