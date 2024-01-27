@@ -53,3 +53,71 @@ mod test_arithmetic {
         assert_eq!(result, 25);
     }
 }
+
+#[cfg(test)]
+mod test_comparison {
+    use super::*;
+
+    #[test]
+    fn test_less_than_expression() {
+        let result = compile!(
+            (< 10 20)
+        );
+
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn test_greater_than_expression() {
+        let result = compile!(
+            (> 10 20)
+        );
+
+        assert_eq!(result, false);
+    }
+
+    #[test]
+    fn test_less_than_or_equal_to_expression() {
+        let result = compile!(
+            (<= 10 20)
+        );
+
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn test_greater_than_or_equal_to_expression() {
+        let result = compile!(
+            (>= 10 20)
+        );
+
+        assert_eq!(result, false);
+    }
+
+    #[test]
+    fn test_equal_to_expression() {
+        let result = compile!(
+            (= 10 20)
+        );
+
+        assert_eq!(result, false);
+    }
+
+    #[test]
+    fn test_not_equal_to_expression() {
+        let result = compile!(
+            (/= 10 20)
+        );
+
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn test_less_than_expression_three_args() {
+        let result = compile!(
+            (< 10 20 30)
+        );
+
+        assert_eq!(result, true);
+    }
+}
