@@ -77,6 +77,15 @@ mod test_arithmetic {
 
         assert_eq!(result, 1);
     }
+
+    #[test]
+    fn test_mod_expression() {
+        let result = compile!(
+            (mod 10 3)
+        );
+
+        assert_eq!(result, 1);
+    }
 }
 
 #[cfg(test)]

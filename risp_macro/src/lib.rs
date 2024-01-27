@@ -187,7 +187,6 @@ fn compile_expression(expression: Group) -> String {
             }
 
             rust_code.push_str(&format!("{}({})", function_name, parameters.join(", ")));
-            println!("!!! {};\n", rust_code);
         }
     }
 
@@ -209,11 +208,13 @@ fn compile_root_expression(token_tree: TokenTree) -> String {
 
 #[proc_macro]
 pub fn compile(item: TokenStream) -> TokenStream {
-    let mut rust_code = "".to_string();
+    let mut rust_lines = vec![];
 
     for token in item {
-        rust_code.push_str(&compile_root_expression(token));
+        rust_lines.push(compile_root_expression(token));
     }
+
+    let rust_code = rust_lines.join(";\n");
 
     rust_code.parse().unwrap()
 }
