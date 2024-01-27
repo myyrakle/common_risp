@@ -3,6 +3,7 @@ use proc_macro::{Group, TokenStream, TokenTree};
 fn replace_spetial_function(name: &str) -> String {
     match name {
         "print" => "common_risp::print".to_string(),
+        "mod" => "common_risp::mod_".to_string(),
         _ => name.to_string(),
     }
 }
@@ -185,7 +186,8 @@ fn compile_expression(expression: Group) -> String {
                 }
             }
 
-            rust_code.push_str(&format!("{}({});\n", function_name, parameters.join(", ")));
+            rust_code.push_str(&format!("{}({})", function_name, parameters.join(", ")));
+            println!("!!! {};\n", rust_code);
         }
     }
 
