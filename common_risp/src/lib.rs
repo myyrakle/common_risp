@@ -78,6 +78,12 @@ mod test_arithmetic {
         );
 
         assert_eq!(result, 1);
+
+        let result = compile!(
+            (rem -1 5)
+        );
+
+        assert_eq!(result, -1);
     }
 
     #[test]
@@ -87,6 +93,12 @@ mod test_arithmetic {
         );
 
         assert_eq!(result, 1);
+
+        let result = compile!(
+            (mod -1 5)
+        );
+
+        assert_eq!(result, 4);
     }
 }
 

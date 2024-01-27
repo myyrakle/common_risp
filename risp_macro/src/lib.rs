@@ -8,6 +8,81 @@ fn replace_spetial_function(name: &str) -> String {
     }
 }
 
+enum ProcessedToken {
+    String(String),
+    Group(Group),
+}
+
+fn preprocess_tokens(tokens: Vec<TokenTree>) -> Vec<ProcessedToken> {
+    let mut processed_tokens = vec![];
+
+    let mut token_iter = tokens.into_iter().peekable();
+
+    while let Some(token) = token_iter.next() {
+        match token {
+            TokenTree::Group(group) if group.delimiter() == proc_macro::Delimiter::Parenthesis => {
+                processed_tokens.push(ProcessedToken::Group(group));
+            }
+            _ => {
+                let mut token = token.to_string();
+
+                // 마이너스 부호 처리
+                match token.as_str() {
+                    "-" => {
+                        let next_token = token_iter
+                            .next()
+                            .expect("There must be a number after the minus sign.")
+                            .to_string();
+
+                        if next_token.parse::<i128>().is_err() && next_token.parse::<f64>().is_err()
+                        {
+                            panic!("There must be a number after the minus sign.");
+                        }
+
+                        token.push_str(next_token.as_str());
+                    }
+                    _ => {}
+                }
+
+                // 식별자 내 :: 연산자 처리
+                while let Some(peeked) = token_iter.peek() {
+                    match peeked.to_string().as_str() {
+                        ":" => {
+                            token_iter.next().unwrap();
+
+                            if let Some(expect_second_colon) = token_iter.next() {
+                                if expect_second_colon.to_string() != ":" {
+                                    panic!(
+                                        "The only operator that can occur in an identifier expression is ::"
+                                    );
+                                }
+                            } else {
+                                panic!("The only operator that can occur in an identifier expression is ::");
+                            }
+
+                            token.push_str("::");
+
+                            let next_token = token_iter
+                                .next()
+                                .expect("The :: operator must be followed by an identifier.")
+                                .to_string();
+
+                            token.push_str(next_token.as_str());
+                        }
+                        _ => {
+                            break;
+                        }
+                    }
+                }
+
+                processed_tokens.push(ProcessedToken::String(token));
+            }
+        }
+    }
+
+    processed_tokens
+}
+
 fn compile_expression(expression: Group) -> String {
     let mut group_iter = expression.stream().into_iter().peekable();
 
@@ -51,23 +126,6 @@ fn compile_expression(expression: Group) -> String {
 
                 function_name += next_token.as_str();
             }
-            "-" => {
-                while let Some(peeked) = group_iter.peek() {
-                    match peeked.to_string().as_str() {
-                        "-" => {
-                            group_iter.next().unwrap();
-
-                            function_name += "_";
-                        }
-                        _ => {
-                            function_name += peeked.to_string().as_str();
-                            group_iter.next().unwrap();
-
-                            break;
-                        }
-                    }
-                }
-            }
             _ => {
                 break;
             }
@@ -75,6 +133,8 @@ fn compile_expression(expression: Group) -> String {
     }
 
     let tokens = group_iter.collect::<Vec<_>>();
+
+    let tokens = preprocess_tokens(tokens);
 
     let mut rust_code = "".to_string();
 
@@ -84,13 +144,11 @@ fn compile_expression(expression: Group) -> String {
 
             for token in tokens {
                 match token {
-                    TokenTree::Group(group)
-                        if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
-                    {
+                    ProcessedToken::Group(group) => {
                         operand.push(compile_expression(group));
                     }
-                    _ => {
-                        operand.push(token.to_string());
+                    ProcessedToken::String(token) => {
+                        operand.push(token);
                     }
                 }
             }
@@ -112,13 +170,11 @@ fn compile_expression(expression: Group) -> String {
 
             for token in tokens {
                 match token {
-                    TokenTree::Group(group)
-                        if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
-                    {
+                    ProcessedToken::Group(group) => {
                         operand.push(compile_expression(group));
                     }
-                    _ => {
-                        operand.push(token.to_string());
+                    ProcessedToken::String(token) => {
+                        operand.push(token);
                     }
                 }
             }
@@ -144,13 +200,11 @@ fn compile_expression(expression: Group) -> String {
 
             for token in tokens {
                 match token {
-                    TokenTree::Group(group)
-                        if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
-                    {
+                    ProcessedToken::Group(group) => {
                         operand.push(compile_expression(group));
                     }
-                    _ => {
-                        operand.push(token.to_string());
+                    ProcessedToken::String(token) => {
+                        operand.push(token);
                     }
                 }
             }
@@ -172,13 +226,11 @@ fn compile_expression(expression: Group) -> String {
 
             for token in tokens {
                 match token {
-                    TokenTree::Group(group)
-                        if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
-                    {
+                    ProcessedToken::Group(group) => {
                         operand.push(compile_expression(group));
                     }
-                    _ => {
-                        operand.push(token.to_string());
+                    ProcessedToken::String(token) => {
+                        operand.push(token);
                     }
                 }
             }
@@ -194,13 +246,11 @@ fn compile_expression(expression: Group) -> String {
 
             for token in tokens {
                 match token {
-                    TokenTree::Group(group)
-                        if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
-                    {
+                    ProcessedToken::Group(group) => {
                         operand.push(compile_expression(group));
                     }
-                    _ => {
-                        operand.push(token.to_string());
+                    ProcessedToken::String(token) => {
+                        operand.push(token);
                     }
                 }
             }
@@ -224,13 +274,11 @@ fn compile_expression(expression: Group) -> String {
 
             for token in tokens {
                 match token {
-                    TokenTree::Group(group)
-                        if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
-                    {
+                    ProcessedToken::Group(group) => {
                         parameters.push(compile_expression(group));
                     }
-                    _ => {
-                        parameters.push(token.to_string());
+                    ProcessedToken::String(token) => {
+                        parameters.push(token);
                     }
                 }
             }
