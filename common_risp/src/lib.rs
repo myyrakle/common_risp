@@ -239,3 +239,62 @@ mod test_variables {
         assert_eq!(x, 20);
     }
 }
+
+#[cfg(test)]
+mod test_functions {
+    use super::*;
+
+    #[test]
+    fn test_defun() {
+        compile!(
+            (defun add (x:i32 y:i32) i32 (+ x y))
+        );
+
+        assert_eq!(add(10, 20), 30);
+    }
+
+    #[test]
+    fn test_defun_with_no_return_type() {
+        compile!(
+            (defun add () (print "Hello, World!"))
+        );
+    }
+
+    #[test]
+    fn test_defun_with_no_args() {
+        compile!(
+            (defun add () i32 (+ 10 20))
+        );
+
+        assert_eq!(add(), 30);
+    }
+
+    #[test]
+    fn test_defun_with_multiline() {
+        compile!(
+            (defun add () i32 (defvar x 10) (defvar y 20) (+ x y))
+        );
+
+        assert_eq!(add(), 30);
+    }
+}
+
+#[cfg(test)]
+mod test_scope {
+    use super::*;
+
+    #[test]
+    fn test_scope() {
+        mod foo {
+            pub fn add(lhs: i32, rhs: i32) -> i32 {
+                lhs + rhs
+            }
+        }
+
+        let result = compile!(
+            (foo::add 10 20)
+        );
+
+        assert_eq!(result, 30);
+    }
+}
