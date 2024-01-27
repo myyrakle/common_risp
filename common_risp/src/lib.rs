@@ -252,4 +252,29 @@ mod test_functions {
 
         assert_eq!(add(10, 20), 30);
     }
+
+    #[test]
+    fn test_defun_with_no_return_type() {
+        compile!(
+            (defun add () (print "Hello, World!"))
+        );
+    }
+
+    #[test]
+    fn test_defun_with_no_args() {
+        compile!(
+            (defun add () i32 (+ 10 20))
+        );
+
+        assert_eq!(add(), 30);
+    }
+
+    #[test]
+    fn test_defun_with_multiline() {
+        compile!(
+            (defun add () i32 (defvar x 10) (defvar y 20) (+ x y))
+        );
+
+        assert_eq!(add(), 30);
+    }
 }
