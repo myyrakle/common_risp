@@ -121,3 +121,35 @@ mod test_comparison {
         assert_eq!(result, true);
     }
 }
+
+#[cfg(test)]
+mod test_boolean {
+    use super::*;
+
+    #[test]
+    fn test_and_expression() {
+        let result = compile!(
+            (and true false)
+        );
+
+        assert_eq!(result, false);
+    }
+
+    #[test]
+    fn test_or_expression() {
+        let result = compile!(
+            (or true false)
+        );
+
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn test_not_expression() {
+        let result = compile!(
+            (not true)
+        );
+
+        assert_eq!(result, false);
+    }
+}
