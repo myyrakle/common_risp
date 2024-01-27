@@ -8,6 +8,7 @@ fn replace_spetial_function(name: &str) -> String {
     }
 }
 
+#[derive(Debug, Clone)]
 enum ProcessedToken {
     String(String),
     Group(Group),
@@ -48,13 +49,13 @@ fn preprocess_tokens(tokens: Vec<TokenTree>) -> Vec<ProcessedToken> {
                 while let Some(peeked) = token_iter.peek() {
                     match peeked.to_string().as_str() {
                         ":" => {
-                            token_iter.next().unwrap();
+                            token_iter.next().unwrap().to_string();
 
-                            if let Some(expect_second_colon) = token_iter.next() {
-                                if expect_second_colon.to_string() != ":" {
-                                    panic!(
-                                        "The only operator that can occur in an identifier expression is ::"
-                                    );
+                            if let Some(after_colon) = token_iter.next() {
+                                if after_colon.to_string() != ":" {
+                                    token.push_str(":");
+                                    token.push_str(after_colon.to_string().as_str());
+                                    break;
                                 }
                             } else {
                                 panic!("The only operator that can occur in an identifier expression is ::");
@@ -282,7 +283,76 @@ fn compile_expression(expression: Group) -> String {
             rust_code.push_str(&format!("let mut {variable_name} = {value};\n"));
         }
         "defun" => {
-            panic!("defun is not supported.")
+            // 1. 함수명 추출
+            let function_name = match tokens.get(0).expect("defun must have a function name.") {
+                ProcessedToken::String(token) => token.to_owned(),
+                _ => panic!(
+                    "The first operand of {} must be a function name.",
+                    function_name
+                ),
+            };
+
+            let parameter_group = match tokens.get(1).expect("defun must have parameters.") {
+                ProcessedToken::Group(group) => group.to_owned(),
+                _ => panic!(
+                    "The second operand of {} must be a parameter group.",
+                    function_name
+                ),
+            };
+            let parameter_group = parameter_group.stream().into_iter().collect::<Vec<_>>();
+
+            // 2. parameter 추출
+            let parameter_group = preprocess_tokens(parameter_group);
+
+            let mut parameters = vec![];
+
+            for token in parameter_group.iter() {
+                match token {
+                    ProcessedToken::String(token) => {
+                        parameters.push(token.to_owned());
+                    }
+                    _ => panic!("The parameter group of {} must be a string.", function_name),
+                }
+            }
+
+            let parameters_code = parameters.join(", ");
+
+            // 3. return type 추출 (optional)
+            let return_type: Option<String> = match tokens.clone().get(2) {
+                Some(ProcessedToken::String(token)) => Some(token.to_owned()),
+                _ => None,
+            };
+            let return_type_code = return_type
+                .clone()
+                .map(|return_type| format!("-> {return_type}"))
+                .unwrap_or_default();
+
+            // 4. 함수 body 추출
+            let mut body_lines = vec![];
+
+            let mut body_iter = tokens.into_iter();
+            _ = body_iter.next();
+            _ = body_iter.next();
+
+            if return_type.is_some() {
+                body_iter.next();
+            }
+
+            for token_tree in body_iter {
+                if let ProcessedToken::Group(group) = token_tree {
+                    body_lines.push(compile_expression(group));
+                } else {
+                    panic!("The bodies of {} must be a group.", function_name);
+                }
+            }
+
+            let body_code = body_lines.join(";\n");
+
+            rust_code.push_str(&format!(
+                r#"fn {function_name}({parameters_code}) {return_type_code} {{
+                    {body_code}
+                }}"#,
+            ));
         }
         "set" => {
             panic!("set is not supported.")
@@ -352,7 +422,6 @@ pub fn compile(item: TokenStream) -> TokenStream {
     }
 
     let rust_code = rust_lines.join(";\n");
-    println!("{}", rust_code);
 
     rust_code.parse().unwrap()
 }
