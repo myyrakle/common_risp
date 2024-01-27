@@ -284,6 +284,29 @@ fn compile_expression(expression: Group) -> String {
         "defun" => {
             panic!("defun is not supported.")
         }
+        "set" => {
+            panic!("set is not supported.")
+        }
+        "setq" => {
+            if tokens.len() != 2 {
+                panic!("{} must have two operands.", function_name);
+            }
+
+            let variable_name = match &tokens[0] {
+                ProcessedToken::String(token) => token,
+                _ => panic!(
+                    "The first operand of {} must be a variable name.",
+                    function_name
+                ),
+            };
+
+            let value = match &tokens[1] {
+                ProcessedToken::Group(group) => compile_expression(group.to_owned()),
+                ProcessedToken::String(token) => token.to_string(),
+            };
+
+            rust_code.push_str(&format!("{variable_name} = {value};\n"));
+        }
         _ => {
             let function_name = replace_spetial_function(function_name.as_str());
 
