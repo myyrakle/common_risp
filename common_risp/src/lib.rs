@@ -5,7 +5,7 @@ pub fn print<T: std::fmt::Display>(value: T) {
 }
 
 #[cfg(test)]
-mod tests {
+mod test_arithmetic {
     use super::*;
 
     #[test]
@@ -33,5 +33,14 @@ mod tests {
         );
 
         assert_eq!(result, 200);
+    }
+
+    #[test]
+    fn test_divide_expression() {
+        let result = compile!(
+            (/ 40 20)
+        );
+
+        assert_eq!(result, 2);
     }
 }
