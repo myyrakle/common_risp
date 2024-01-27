@@ -261,8 +261,25 @@ fn compile_expression(expression: Group) -> String {
 
             rust_code.push_str(&format!("(!{})", operand[0]));
         }
-        "defparameter" => {
-            panic!("defparameter is not supported.")
+        "defparameter" | "defvar" => {
+            if tokens.len() != 2 {
+                panic!("{} must have two operands.", function_name);
+            }
+
+            let variable_name = match &tokens[0] {
+                ProcessedToken::String(token) => token,
+                _ => panic!(
+                    "The first operand of {} must be a variable name.",
+                    function_name
+                ),
+            };
+
+            let value = match &tokens[1] {
+                ProcessedToken::Group(group) => compile_expression(group.to_owned()),
+                ProcessedToken::String(token) => token.to_string(),
+            };
+
+            rust_code.push_str(&format!("let mut {variable_name} = {value};\n"));
         }
         "defun" => {
             panic!("defun is not supported.")
