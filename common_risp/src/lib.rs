@@ -52,6 +52,15 @@ mod test_arithmetic {
 
         assert_eq!(result, 25);
     }
+
+    #[test]
+    fn test_rem_expression() {
+        let result = compile!(
+            (rem 10 3)
+        );
+
+        assert_eq!(result, 1);
+    }
 }
 
 #[cfg(test)]
