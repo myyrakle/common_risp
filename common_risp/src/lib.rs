@@ -201,3 +201,41 @@ mod test_boolean {
         assert_eq!(result, false);
     }
 }
+
+#[cfg(test)]
+mod test_variables {
+    use super::*;
+
+    #[test]
+    fn test_defvar() {
+        compile!(
+            (defvar x 10)
+        );
+
+        assert_eq!(x, 10);
+    }
+
+    #[test]
+    fn test_defparameter() {
+        compile!(
+            (defparameter x 10)
+        );
+
+        assert_eq!(x, 10);
+    }
+
+    #[test]
+    fn test_setq() {
+        compile!(
+            (defparameter x 10)
+        );
+
+        assert_eq!(x, 10);
+
+        compile!(
+            (setq x 20)
+        );
+
+        assert_eq!(x, 20);
+    }
+}
