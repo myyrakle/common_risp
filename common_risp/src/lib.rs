@@ -43,4 +43,13 @@ mod test_arithmetic {
 
         assert_eq!(result, 2);
     }
+
+    #[test]
+    fn test_add_subtract_expression() {
+        let result = compile!(
+            (+ 10 (- 20 5))
+        );
+
+        assert_eq!(result, 25);
+    }
 }
