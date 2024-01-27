@@ -78,6 +78,14 @@ fn preprocess_tokens(tokens: Vec<TokenTree>) -> Vec<ProcessedToken> {
                     }
                 }
 
+                if token == "t" {
+                    token = "true".to_string();
+                }
+
+                if token == "nil" {
+                    token = "false".to_string();
+                }
+
                 processed_tokens.push(ProcessedToken::String(token));
             }
         }
