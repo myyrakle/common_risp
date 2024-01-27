@@ -1,7 +1,25 @@
+#[allow(unused_imports)]
+use crate as common_risp;
 pub use risp_macro::compile;
 
 pub fn print<T: std::fmt::Display>(value: T) {
     println!("{}", value);
+}
+
+pub fn mod_<T>(lhs: T, rhs: T) -> T
+where
+    T: std::ops::Rem<Output = T>
+        + std::ops::Add<Output = T>
+        + std::ops::AddAssign
+        + std::cmp::PartialOrd<T>
+        + std::default::Default
+        + Copy,
+{
+    let mut result = lhs % rhs;
+    if result < T::default() {
+        result += rhs;
+    }
+    result
 }
 
 #[cfg(test)]
@@ -51,6 +69,24 @@ mod test_arithmetic {
         );
 
         assert_eq!(result, 25);
+    }
+
+    #[test]
+    fn test_rem_expression() {
+        let result = compile!(
+            (rem 10 3)
+        );
+
+        assert_eq!(result, 1);
+    }
+
+    #[test]
+    fn test_mod_expression() {
+        let result = compile!(
+            (mod 10 3)
+        );
+
+        assert_eq!(result, 1);
     }
 }
 

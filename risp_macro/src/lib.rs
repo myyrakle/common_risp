@@ -3,6 +3,7 @@ use proc_macro::{Group, TokenStream, TokenTree};
 fn replace_spetial_function(name: &str) -> String {
     match name {
         "print" => "common_risp::print".to_string(),
+        "mod" => "common_risp::mod_".to_string(),
         _ => name.to_string(),
     }
 }
@@ -89,6 +90,28 @@ fn compile_expression(expression: Group) -> String {
 
             rust_code.push_str(&format!("({})", binary_expressions.join("&&")));
         }
+        "rem" => {
+            let mut operand = vec![];
+
+            for token in tokens {
+                match token {
+                    TokenTree::Group(group)
+                        if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
+                    {
+                        operand.push(compile_expression(group));
+                    }
+                    _ => {
+                        operand.push(token.to_string());
+                    }
+                }
+            }
+
+            if operand.len() != 2 {
+                panic!("{} must have two operands.", function_name);
+            }
+
+            rust_code.push_str(&format!("({} % {})", operand[0], operand[1]));
+        }
         "and" | "or" => {
             let mut operand = vec![];
 
@@ -163,7 +186,7 @@ fn compile_expression(expression: Group) -> String {
                 }
             }
 
-            rust_code.push_str(&format!("{}({});\n", function_name, parameters.join(", ")));
+            rust_code.push_str(&format!("{}({})", function_name, parameters.join(", ")));
         }
     }
 
@@ -185,11 +208,14 @@ fn compile_root_expression(token_tree: TokenTree) -> String {
 
 #[proc_macro]
 pub fn compile(item: TokenStream) -> TokenStream {
-    let mut rust_code = "".to_string();
+    let mut rust_lines = vec![];
 
     for token in item {
-        rust_code.push_str(&compile_root_expression(token));
+        rust_lines.push(compile_root_expression(token));
     }
+
+    let rust_code = rust_lines.join(";\n");
+    println!("{}", rust_code);
 
     rust_code.parse().unwrap()
 }
