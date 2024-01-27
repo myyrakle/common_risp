@@ -16,4 +16,13 @@ mod tests {
 
         assert_eq!(result, 30);
     }
+
+    #[test]
+    fn test_subtract_expression() {
+        let result = compile!(
+            (- 10 20)
+        );
+
+        assert_eq!(result, -10);
+    }
 }
