@@ -1,3 +1,5 @@
+use core::panic;
+
 use proc_macro::{Group, TokenStream, TokenTree};
 
 fn replace_spetial_function(name: &str) -> String {
@@ -376,6 +378,34 @@ fn compile_expression(expression: Group) -> String {
             };
 
             rust_code.push_str(&format!("{variable_name} = {value};\n"));
+        }
+        "if" => {
+            if tokens.len() != 3 {
+                panic!("{} must have three operands.", function_name);
+            }
+
+            let condition_expression = match tokens[0].clone() {
+                ProcessedToken::Group(group) => compile_expression(group),
+                ProcessedToken::String(token) => token,
+            };
+
+            let true_expression = match tokens[1].clone() {
+                ProcessedToken::Group(group) => compile_expression(group),
+                ProcessedToken::String(token) => token,
+            };
+
+            let false_expression = match tokens[2].clone() {
+                ProcessedToken::Group(group) => compile_expression(group),
+                ProcessedToken::String(token) => token,
+            };
+
+            rust_code.push_str(&format!(
+                r#"if {condition_expression} {{ 
+                    {true_expression} 
+                }} else {{ 
+                    {false_expression} 
+                }}"#
+            ));
         }
         _ => {
             let function_name = replace_spetial_function(function_name.as_str());
