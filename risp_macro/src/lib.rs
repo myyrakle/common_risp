@@ -13,15 +13,64 @@ fn compile_expression(expression: Group) -> String {
 
     let function_name = group_iter
         .next()
-        .expect("Every root expression must have a function name.")
+        .expect("Every expression must have a function name.")
         .to_string();
     let mut function_name = function_name;
 
+    // Handles special operator patterns.
     if function_name == ">" || function_name == "<" || function_name == "/" {
         let next_token = group_iter.peek().unwrap().to_string();
         if next_token == "=" {
             group_iter.next();
             function_name += next_token.as_str();
+        }
+    }
+
+    // Standardize function names.
+    while let Some(peeked) = group_iter.peek() {
+        match peeked.to_string().as_str() {
+            ":" => {
+                group_iter.next().unwrap();
+
+                if let Some(expect_second_colon) = group_iter.next() {
+                    if expect_second_colon.to_string() != ":" {
+                        panic!(
+                            "The only operator that can occur in an identifier expression is ::"
+                        );
+                    }
+                } else {
+                    panic!("The only operator that can occur in an identifier expression is ::");
+                }
+
+                function_name += "::";
+
+                let next_token = group_iter
+                    .next()
+                    .expect("The :: operator must be followed by an identifier.")
+                    .to_string();
+
+                function_name += next_token.as_str();
+            }
+            "-" => {
+                while let Some(peeked) = group_iter.peek() {
+                    match peeked.to_string().as_str() {
+                        "-" => {
+                            group_iter.next().unwrap();
+
+                            function_name += "_";
+                        }
+                        _ => {
+                            function_name += peeked.to_string().as_str();
+                            group_iter.next().unwrap();
+
+                            break;
+                        }
+                    }
+                }
+            }
+            _ => {
+                break;
+            }
         }
     }
 
