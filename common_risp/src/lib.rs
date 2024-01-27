@@ -25,4 +25,13 @@ mod tests {
 
         assert_eq!(result, -10);
     }
+
+    #[test]
+    fn test_multiply_expression() {
+        let result = compile!(
+            (* 10 20)
+        );
+
+        assert_eq!(result, 200);
+    }
 }
