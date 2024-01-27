@@ -4,6 +4,22 @@ pub fn print<T: std::fmt::Display>(value: T) {
     println!("{}", value);
 }
 
+pub fn mod_<T>(lhs: T, rhs: T) -> T
+where
+    T: std::ops::Rem<Output = T>
+        + std::ops::Add<Output = T>
+        + std::ops::AddAssign
+        + std::cmp::PartialOrd<T>
+        + std::default::Default
+        + Copy,
+{
+    let mut result = lhs % rhs;
+    if result < T::default() {
+        result += rhs;
+    }
+    result
+}
+
 #[cfg(test)]
 mod test_arithmetic {
     use super::*;
