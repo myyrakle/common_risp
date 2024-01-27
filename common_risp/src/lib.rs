@@ -298,3 +298,26 @@ mod test_scope {
         assert_eq!(result, 30);
     }
 }
+
+#[cfg(test)]
+mod test_if {
+    use super::*;
+
+    #[test]
+    fn test_if() {
+        let result = compile!(
+            (if true 10 20)
+        );
+
+        assert_eq!(result, 10);
+    }
+
+    #[test]
+    fn test_if_false() {
+        let result = compile!(
+            (if false 10 20)
+        );
+
+        assert_eq!(result, 20);
+    }
+}
