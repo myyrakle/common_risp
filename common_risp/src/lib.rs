@@ -1,11 +1,181 @@
+/*!
+Common RISP is a LISP language implementation that operates embedded in Rust code.
+
+## Get Started
+
+The code below uses LISP format to calculate and print a numeric value.
+```
+fn main() {
+    common_risp::compile!(
+        (print 99)
+        (print (+ 1 2 (* 3 4) 5))
+    );
+}
+```
+
+The execution result is as follows:
+```bash
+ Compiling common_risp v0.0.0 (/home/myyrakle/Codes/Rust/common_risp/common_risp)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.10s
+     Running `target/debug/common_risp`
+99
+20
+```
+
+## Operators
+
+RISP provides +, -, *, /, rem, mod as the basic arithmetic operators.
+The behavior is almost identical to LISP.
+```
+fn main() {
+    common_risp::compile!(
+        (print (+ 1 2 3 4 5))
+        (print (- 10 20))
+        (print (* 10 20))
+        (print (/ 40 20))
+        (print (rem 10 3))
+        (print (mod 10 3))
+    );
+}
+```
+
+Comparison operators are provided as <, >, <=, >=, =, and /=.
+```
+fn main() {
+    common_risp::compile!(
+        (print (< 10 20))
+        (print (< 10 20 30))
+        (print (> 10 20))
+        (print (<= 10 20))
+        (print (>= 10 20))
+        (print (= 10 20))
+        (print (/= 10 20))
+    );
+}
+```
+
+Logical operators and, or, and not are provided.
+```
+fn main() {
+    common_risp::compile!(
+        (print (and true false))
+        (print (or true false))
+        (print (not true))
+    );
+}
+```
+
+
+## Variables
+
+RISP provides variable declaration functionality through the defvar and defparameter functions.
+
+```
+fn main() {
+    common_risp::compile!(
+        (defvar x 10)
+        (defparameter y 20)
+        (print (+ x y))
+    );
+}
+```
+
+And, you can change the value of a variable through setq.
+
+```
+fn main() {
+    common_risp::compile!(
+        (defvar x 10)
+        (defparameter y 20)
+        (print (+ x y))
+        (setq x 30)
+        (setq y 40)
+        (print (+ x y))
+    );
+}
+```
+
+## Function
+RISP provides function declaration functionality through the defun function.
+
+```
+fn main() {
+    common_risp::compile!(
+        (defun add (x:i32 y:i32) i32 (+ x y))
+        (print (add 10 20))
+    );
+}
+```
+The difference between RISP and LISP is that parameter types and return types were added for type stability.
+However, if there is no return type, it can be omitted.
+
+```
+fn main() {
+    common_risp::compile!(
+        (defun print_add (x:i32 y:i32) (print (+ x y)))
+        (print_add 10 20)
+    );
+}
+```
+
+## IF
+RISP provides an IF statement.
+
+
+```
+fn main() {
+    common_risp::compile!(
+        (defvar x 10)
+        (defvar y 20)
+        (if (< x y) (print "x is less than y") (print "x is greater than or equal to y"))
+    );
+}
+```
+
+## Interoperability
+
+Variables and functions defined within RISP code can also be used outside RISP code.
+```
+fn main() {
+    common_risp::compile!(
+        (defvar x 10)
+        (defun add (x:i32 y:i32) i32 (+ x y))
+    );
+
+    assert_eq!(x, 10);
+    assert_eq!(add(10, 20), 30);
+}
+```
+
+Also, the opposite is possible.
+```
+fn main() {
+    let x = 10;
+
+    common_risp::compile!(
+        (defun add (x:i32 y:i32) i32 (+ x y))
+        (print (add x 20))
+    );
+}
+```
+*/
+
 #[allow(unused_imports)]
 use crate as common_risp;
+
+/// Compile RISP code and execute it.
 pub use risp_macro::compile;
 
+/// There is no need to use it outside of RISP code.
+///
+/// Print a value.
 pub fn print<T: std::fmt::Display>(value: T) {
     println!("{}", value);
 }
 
+/// There is no need to use it outside of RISP code.
+///
+/// Performs modulo operations on numbers.
 pub fn mod_<T>(lhs: T, rhs: T) -> T
 where
     T: std::ops::Rem<Output = T>

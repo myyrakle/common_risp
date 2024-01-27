@@ -1,7 +1,8 @@
 # common_risp
 
-Provides a representation of LISP through macro expansion.
+![](https://img.shields.io/badge/language-Rust-red) ![](https://img.shields.io/badge/version-0.1.0-brightgreen) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/myyrakle/common_risp/blob/master/LICENSE)
 
+Common RISP is a LISP language implementation that operates embedded in Rust code.
 
 ## Get Started 
 
@@ -10,7 +11,7 @@ The code below uses LISP format to calculate and print a numeric value.
 fn main() {
     common_risp::compile!(
         (print 99)
-        (print (+ 1 2 (*3 4) 5))
+        (print (+ 1 2 (* 3 4) 5))
     );
 }
 ```
@@ -23,3 +24,7 @@ The execution result is as follows:
 99
 20
 ```
+
+## More Details
+
+Please refer to [the documentation](https://docs.rs/common_risp/latest/common_risp) for more details.
