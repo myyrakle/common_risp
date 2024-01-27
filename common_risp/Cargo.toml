@@ -1,14 +1,15 @@
 [package]
 name = "common_risp"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 authors = ["myyrakle <sssang97@naver.com>"] 
 description = "LISP" 
 keywords = ["lisp", "functional"] 
 repository = "https://github.com/myyrakle/common_risp" 
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+readme = "./../README.md"
+documentation = "https://docs.rs/common_risp/latest/common_risp" 
+homepage = "https://github.com/myyrakle/common_risp/blob/master/README.md" 
 
 [dependencies]
 risp_macro={ version="0.1.0", path="../risp_macro" }
