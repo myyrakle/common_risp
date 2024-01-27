@@ -278,3 +278,23 @@ mod test_functions {
         assert_eq!(add(), 30);
     }
 }
+
+#[cfg(test)]
+mod test_scope {
+    use super::*;
+
+    #[test]
+    fn test_scope() {
+        mod foo {
+            pub fn add(lhs: i32, rhs: i32) -> i32 {
+                lhs + rhs
+            }
+        }
+
+        let result = compile!(
+            (foo::add 10 20)
+        );
+
+        assert_eq!(result, 30);
+    }
+}
