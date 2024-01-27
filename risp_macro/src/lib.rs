@@ -89,6 +89,56 @@ fn compile_expression(expression: Group) -> String {
 
             rust_code.push_str(&format!("({})", binary_expressions.join("&&")));
         }
+        "and" | "or" => {
+            let mut operand = vec![];
+
+            let operator = match function_name.as_str() {
+                "and" => "&&",
+                "or" => "||",
+                _ => unreachable!(),
+            };
+
+            for token in tokens {
+                match token {
+                    TokenTree::Group(group)
+                        if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
+                    {
+                        operand.push(compile_expression(group));
+                    }
+                    _ => {
+                        operand.push(token.to_string());
+                    }
+                }
+            }
+
+            if operand.len() < 2 {
+                panic!("{} must have at least two operands.", function_name);
+            }
+
+            rust_code.push_str(&format!("({})", operand.join(operator)));
+        }
+        "not" => {
+            let mut operand = vec![];
+
+            for token in tokens {
+                match token {
+                    TokenTree::Group(group)
+                        if group.delimiter() == proc_macro::Delimiter::Parenthesis =>
+                    {
+                        operand.push(compile_expression(group));
+                    }
+                    _ => {
+                        operand.push(token.to_string());
+                    }
+                }
+            }
+
+            if operand.len() != 1 {
+                panic!("{} must have one operand.", function_name);
+            }
+
+            rust_code.push_str(&format!("(!{})", operand[0]));
+        }
         "defparameter" => {
             panic!("defparameter is not supported.")
         }
