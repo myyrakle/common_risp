@@ -215,6 +215,7 @@ pub fn compile(item: TokenStream) -> TokenStream {
     }
 
     let rust_code = rust_lines.join(";\n");
+    println!("{}", rust_code);
 
     rust_code.parse().unwrap()
 }

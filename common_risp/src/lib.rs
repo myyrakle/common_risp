@@ -1,3 +1,5 @@
+#[allow(unused_imports)]
+use crate as common_risp;
 pub use risp_macro::compile;
 
 pub fn print<T: std::fmt::Display>(value: T) {
